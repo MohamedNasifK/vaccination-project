@@ -1,0 +1,72 @@
+{% extends 'vaccination_app/base.html' %}
+{% block title %}Immunization Records - VacciTrack{% endblock %}
+{% block page_title %}Immunization Records{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 style="font-size:20px; font-weight:800; margin-bottom:2px;">Immunization Records</h2>
+        <p style="color:var(--text-muted); font-size:13px;">{{ records.count }} record(s)</p>
+    </div>
+    {% if role == 'admin' or role == 'doctor' %}
+    <a href="{% url 'record_add' %}" class="btn btn-primary"><i class="fa fa-plus me-2"></i>Add Record</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if records %}
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>Child</th>
+                    <th>Vaccine</th>
+                    <th>Dose</th>
+                    <th>Scheduled</th>
+                    <th>Administered</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for r in records %}
+            <tr {% if r.is_overdue %}style="background:#fff8f8;"{% endif %}>
+                <td><strong>{{ r.child }}</strong></td>
+                <td>
+                    {{ r.vaccine.name }}
+                    <br><small style="color:var(--text-muted);">{{ r.vaccine.short_name }}</small>
+                </td>
+                <td>{{ r.dose_number }}</td>
+                <td>
+                    {{ r.scheduled_date|date:"M d, Y" }}
+                    {% if r.is_overdue %}
+                    <br><small style="color:var(--danger);"><i class="fa fa-triangle-exclamation me-1"></i>Overdue</small>
+                    {% endif %}
+                </td>
+                <td>{{ r.administered_date|date:"M d, Y"|default:"-" }}</td>
+                <td><span class="badge-status badge-{{ r.status }}">{{ r.get_status_display }}</span></td>
+                <td>
+                    {% if role == 'admin' or role == 'doctor' %}
+                    <a href="{% url 'record_edit' r.pk %}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+                    {% endif %}
+                    {% if not r.reminder_sent and r.status == 'scheduled' %}
+                    <a href="{% url 'send_reminder' r.pk %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fa fa-bell me-1"></i>Remind
+                    </a>
+                    {% elif r.reminder_sent %}
+                    <span style="font-size:11px; color:var(--text-muted);"><i class="fa fa-check me-1"></i>Reminded</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fa fa-file-medical" style="font-size:48px; color:#ccc; display:block; margin-bottom:16px;"></i>
+            <p style="color:var(--text-muted);">No vaccination records found.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

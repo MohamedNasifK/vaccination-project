@@ -1,0 +1,78 @@
+{% extends 'vaccination_app/base.html' %}
+{% block title %}Vaccines - VacciTrack{% endblock %}
+{% block page_title %}Vaccines{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 style="font-size:20px; font-weight:800; margin-bottom:2px;">Vaccine Directory</h2>
+        <p style="color:var(--text-muted); font-size:13px;">{{ vaccines.count }} vaccines listed</p>
+    </div>
+    <a href="{% url 'vaccine_add' %}" class="btn btn-primary"><i class="fa fa-plus me-2"></i>Add Vaccine</a>
+</div>
+
+<div class="row g-3">
+    {% for vaccine in vaccines %}
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                    <div>
+                        <div style="font-size:16px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;">{{ vaccine.name }}</div>
+                        <span class="badge-status badge-scheduled">{{ vaccine.short_name }}</span>
+                    </div>
+                    {% if vaccine.is_mandatory %}
+                    <span class="badge-status badge-completed"><i class="fa fa-star me-1"></i>Mandatory</span>
+                    {% else %}
+                    <span class="badge-status badge-pending">Optional</span>
+                    {% endif %}
+                </div>
+
+                {% if vaccine.description %}
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">{{ vaccine.description|truncatechars:100 }}</p>
+                {% endif %}
+
+                <div style="font-size:12px; display:grid; gap:6px; border-top:1px solid var(--border); padding-top:12px;">
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--text-muted);">Recommended Age</span>
+                        <strong>
+                            {% if vaccine.recommended_age_months < 12 %}
+                                {{ vaccine.recommended_age_months }} months
+                            {% else %}
+                                {% widthratio vaccine.recommended_age_months 12 1 %} year(s)
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--text-muted);">Doses Required</span>
+                        <strong>{{ vaccine.doses_required }}</strong>
+                    </div>
+                    {% if vaccine.interval_days > 0 %}
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--text-muted);">Dose Interval</span>
+                        <strong>{{ vaccine.interval_days }} days</strong>
+                    </div>
+                    {% endif %}
+                    {% if vaccine.manufacturer %}
+                    <div class="d-flex justify-content-between">
+                        <span style="color:var(--text-muted);">Manufacturer</span>
+                        <strong>{{ vaccine.manufacturer }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card">
+            <div class="text-center py-5">
+                <i class="fa fa-vial" style="font-size:48px; color:#ccc; display:block; margin-bottom:16px;"></i>
+                <p style="color:var(--text-muted);">No vaccines in the directory yet.</p>
+                <a href="{% url 'vaccine_add' %}" class="btn btn-primary">Add First Vaccine</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

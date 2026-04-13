@@ -1,0 +1,311 @@
+{% extends 'vaccination_app/base.html' %}
+{% block title %}Dashboard - VacciTrack{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 style="font-size:22px; font-weight:800; margin-bottom:4px;">
+        Good day, {{ user.first_name|default:user.username }}! 👋
+    </h2>
+    <p style="color:var(--text-muted); font-size:14px;">
+        {{ today|date:"l, F j, Y" }}
+    </p>
+</div>
+
+<!-- ADMIN / SUPERUSER DASHBOARD -->
+{% if role == 'admin' or user.is_superuser %}
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fa fa-child"></i></div>
+            <div>
+                <div class="stat-value">{{ total_children }}</div>
+                <div class="stat-label">Total Children</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="fa fa-users"></i></div>
+            <div>
+                <div class="stat-value">{{ total_parents }}</div>
+                <div class="stat-label">Parents Registered</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fa fa-user-doctor"></i></div>
+            <div>
+                <div class="stat-value">{{ total_doctors }}</div>
+                <div class="stat-label">Doctors</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-icon red"><i class="fa fa-triangle-exclamation"></i></div>
+            <div>
+                <div class="stat-value">{{ overdue_vaccinations }}</div>
+                <div class="stat-label">Overdue Vaccinations</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fa fa-calendar-check me-2" style="color:var(--primary);"></i>Upcoming Appointments</span>
+                <a href="{% url 'appointments_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+                {% if upcoming_appointments %}
+                <table class="table mb-0">
+                    <thead><tr><th>Child</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+                    <tbody>
+                    {% for appt in upcoming_appointments %}
+                    <tr>
+                        <td><strong>{{ appt.child }}</strong><br><small style="color:var(--text-muted);">{{ appt.parent.get_full_name }}</small></td>
+                        <td>{{ appt.appointment_date|date:"M d, Y" }}</td>
+                        <td>{{ appt.appointment_time|time:"g:i A" }}</td>
+                        <td><span class="badge-status badge-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-4" style="color:var(--text-muted); font-size:14px;">No upcoming appointments</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header"><i class="fa fa-file-medical me-2" style="color:var(--primary);"></i>Recent Vaccinations</div>
+            <div class="card-body p-0">
+                {% if recent_records %}
+                <table class="table mb-0">
+                    <thead><tr><th>Child</th><th>Vaccine</th><th>Date</th></tr></thead>
+                    <tbody>
+                    {% for r in recent_records %}
+                    <tr>
+                        <td>{{ r.child.first_name }}</td>
+                        <td><span class="badge-status badge-completed">{{ r.vaccine.short_name }}</span></td>
+                        <td>{{ r.administered_date|date:"M d" }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-4" style="color:var(--text-muted); font-size:14px;">No records yet</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DOCTOR DASHBOARD -->
+{% elif role == 'doctor' %}
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fa fa-calendar-day"></i></div>
+            <div>
+                <div class="stat-value">{{ today_appointments.count }}</div>
+                <div class="stat-label">Today's Appointments</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="fa fa-calendar-check"></i></div>
+            <div>
+                <div class="stat-value">{{ my_appointments.count }}</div>
+                <div class="stat-label">Upcoming</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon amber"><i class="fa fa-syringe"></i></div>
+            <div>
+                <div class="stat-value">{{ recent_records.count }}</div>
+                <div class="stat-label">Vaccinations Done</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header"><i class="fa fa-calendar me-2" style="color:var(--primary);"></i>Today's Schedule</div>
+            <div class="card-body p-0">
+                {% if today_appointments %}
+                <table class="table mb-0">
+                    <thead><tr><th>Child</th><th>Time</th><th>Status</th></tr></thead>
+                    <tbody>
+                    {% for appt in today_appointments %}
+                    <tr>
+                        <td><strong>{{ appt.child }}</strong></td>
+                        <td>{{ appt.appointment_time|time:"g:i A" }}</td>
+                        <td><span class="badge-status badge-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-4" style="color:var(--text-muted); font-size:14px;">No appointments today</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header"><i class="fa fa-file-medical me-2" style="color:var(--primary);"></i>Recent Records</div>
+            <div class="card-body p-0">
+                {% if recent_records %}
+                <table class="table mb-0">
+                    <thead><tr><th>Child</th><th>Vaccine</th><th>Date</th></tr></thead>
+                    <tbody>
+                    {% for r in recent_records %}
+                    <tr>
+                        <td>{{ r.child }}</td>
+                        <td>{{ r.vaccine.short_name }}</td>
+                        <td>{{ r.administered_date|date:"M d" }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-4" style="color:var(--text-muted); font-size:14px;">No records yet</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PARENT DASHBOARD -->
+{% else %}
+{% if overdue_count > 0 %}
+<div class="alert" style="background:#fdecea; color:#922b21; font-size:14px; font-weight:500; border-radius:12px; padding:14px 18px;">
+    <i class="fa fa-triangle-exclamation me-2"></i>
+    <strong>{{ overdue_count }} overdue vaccination(s)!</strong> Please schedule an appointment soon.
+</div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="fa fa-child"></i></div>
+            <div>
+                <div class="stat-value">{{ children.count }}</div>
+                <div class="stat-label">My Children</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="fa fa-calendar-check"></i></div>
+            <div>
+                <div class="stat-value">{{ upcoming_appointments.count }}</div>
+                <div class="stat-label">Upcoming Appointments</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-4">
+        <div class="stat-card">
+            <div class="stat-icon {% if overdue_count > 0 %}red{% else %}green{% endif %}"><i class="fa fa-syringe"></i></div>
+            <div>
+                <div class="stat-value">{{ overdue_count }}</div>
+                <div class="stat-label">Overdue Vaccines</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fa fa-child me-2" style="color:var(--primary);"></i>My Children</span>
+                <a href="{% url 'child_add' %}" class="btn btn-sm btn-primary"><i class="fa fa-plus me-1"></i>Add</a>
+            </div>
+            <div class="card-body">
+                {% if children %}
+                {% for child in children %}
+                <a href="{% url 'child_detail' child.pk %}" style="text-decoration:none;">
+                    <div class="d-flex align-items-center gap-3 p-3 rounded-3 mb-2" style="background:var(--primary-soft); transition:0.2s;" onmouseover="this.style.background='#d4ead9'" onmouseout="this.style.background='var(--primary-soft)'">
+                        <div style="width:42px; height:42px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;">
+                            {{ child.first_name|first|upper }}
+                        </div>
+                        <div>
+                            <div style="font-weight:600; color:var(--text-main); font-size:14px;">{{ child.first_name }} {{ child.last_name }}</div>
+                            <div style="font-size:12px; color:var(--text-muted);">{{ child.age_display }} &bull; {{ child.get_gender_display }}</div>
+                        </div>
+                        <i class="fa fa-chevron-right ms-auto" style="color:var(--text-muted); font-size:12px;"></i>
+                    </div>
+                </a>
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fa fa-child-reaching" style="font-size:40px; color:#ccc; margin-bottom:12px; display:block;"></i>
+                    <p style="color:var(--text-muted); font-size:14px;">No children added yet.</p>
+                    <a href="{% url 'child_add' %}" class="btn btn-primary btn-sm">Add Your First Child</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fa fa-calendar me-2" style="color:var(--primary);"></i>Upcoming Appointments</span>
+                <a href="{% url 'appointment_add' %}" class="btn btn-sm btn-primary"><i class="fa fa-plus me-1"></i>Book</a>
+            </div>
+            <div class="card-body p-0">
+                {% if upcoming_appointments %}
+                <table class="table mb-0">
+                    <thead><tr><th>Child</th><th>Date & Time</th><th>Status</th></tr></thead>
+                    <tbody>
+                    {% for appt in upcoming_appointments %}
+                    <tr>
+                        <td><strong>{{ appt.child }}</strong></td>
+                        <td>{{ appt.appointment_date|date:"M d" }} at {{ appt.appointment_time|time:"g:i A" }}</td>
+                        <td><span class="badge-status badge-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-4" style="color:var(--text-muted); font-size:14px;">No upcoming appointments</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><i class="fa fa-syringe me-2" style="color:var(--primary);"></i>Due Soon</div>
+            <div class="card-body p-0">
+                {% if upcoming_vaccinations %}
+                <table class="table mb-0">
+                    <thead><tr><th>Child</th><th>Vaccine</th><th>Due Date</th></tr></thead>
+                    <tbody>
+                    {% for r in upcoming_vaccinations %}
+                    <tr>
+                        <td>{{ r.child.first_name }}</td>
+                        <td>{{ r.vaccine.short_name }}</td>
+                        <td>{{ r.scheduled_date|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-4" style="color:var(--text-muted); font-size:14px;">All vaccinations up to date! 🎉</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

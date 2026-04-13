@@ -1,0 +1,90 @@
+{% extends 'vaccination_app/base.html' %}
+{% block auth_content %}
+<style>
+    body { background: linear-gradient(135deg, #0f3d24 0%, #1a6b3c 60%, #27ae60 100%); }
+    .reg-wrap {
+        min-height: 100vh;
+        display: flex; align-items: center; justify-content: center;
+        padding: 32px 24px;
+    }
+    .reg-card {
+        background: #fff;
+        border-radius: 24px;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+        width: 100%; max-width: 520px;
+        overflow: hidden;
+    }
+    .reg-header {
+        background: #0f3d24;
+        padding: 32px 40px;
+        text-align: center;
+    }
+    .reg-title { color: #fff; font-size: 22px; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .reg-body { padding: 32px 40px; }
+    .btn-reg {
+        width: 100%; padding: 13px;
+        background: #1a6b3c; border: none; border-radius: 12px;
+        color: #fff; font-weight: 700; font-size: 15px;
+        font-family: 'Plus Jakarta Sans', sans-serif; cursor: pointer;
+    }
+    .btn-reg:hover { background: #27ae60; }
+</style>
+<div class="reg-wrap">
+    <div class="reg-card">
+        <div class="reg-header">
+            <div style="font-size:28px; margin-bottom:8px;">💉</div>
+            <div class="reg-title">Create Account</div>
+            <div style="color:#7dc99a; font-size:13px; margin-top:4px;">Join VacciTrack today</div>
+        </div>
+        <div class="reg-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-6">
+                        <label class="form-label">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Username</label>
+                        {{ form.username }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Email</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Phone</label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Role</label>
+                        {{ form.role }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Password</label>
+                        {{ form.password1 }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Confirm Password</label>
+                        {{ form.password2 }}
+                    </div>
+                </div>
+                {% if form.errors %}
+                <div class="alert alert-danger mt-3 rounded-3" style="font-size:13px;">
+                    {% for field in form %}{% for error in field.errors %}<div>{{ field.label }}: {{ error }}</div>{% endfor %}{% endfor %}
+                </div>
+                {% endif %}
+                <button type="submit" class="btn-reg mt-4">Create Account</button>
+            </form>
+            <div class="text-center mt-3" style="font-size:14px; color:#555;">
+                Already have an account?
+                <a href="{% url 'login' %}" style="color:#1a6b3c; font-weight:600; text-decoration:none;">Sign in</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

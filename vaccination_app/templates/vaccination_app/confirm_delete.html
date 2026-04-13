@@ -1,0 +1,30 @@
+{% extends 'vaccination_app/base.html' %}
+{% block title %}Confirm Delete - VacciTrack{% endblock %}
+{% block page_title %}Confirm Delete{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card text-center">
+            <div class="card-body" style="padding: 48px 32px;">
+                <div style="width:72px; height:72px; background:#fdecea; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; font-size:28px; color:var(--danger);">
+                    <i class="fa fa-trash"></i>
+                </div>
+                <h3 style="font-size:20px; font-weight:800; margin-bottom:10px;">Delete Record?</h3>
+                <p style="color:var(--text-muted); font-size:14px; margin-bottom:28px;">
+                    You are about to delete <strong>{{ object }}</strong>. This action cannot be undone.
+                </p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="fa fa-trash me-2"></i>Yes, Delete
+                        </button>
+                    </form>
+                    <button onclick="history.back()" class="btn btn-outline-secondary px-4">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'vaccination_app/base.html' %}
+{% block title %}Children - VacciTrack{% endblock %}
+{% block page_title %}Children{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 style="font-size:20px; font-weight:800; margin-bottom:2px;">Children</h2>
+        <p style="color:var(--text-muted); font-size:13px;">{{ children.count }} record(s) found</p>
+    </div>
+    <a href="{% url 'child_add' %}" class="btn btn-primary"><i class="fa fa-plus me-2"></i>Add Child</a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if children %}
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Date of Birth</th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Blood Group</th>
+                    {% if role != 'parent' %}<th>Parent</th>{% endif %}
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for child in children %}
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div style="width:36px; height:36px; background:var(--primary-soft); border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--primary); font-weight:700; font-size:13px; font-family:'Plus Jakarta Sans',sans-serif;">
+                            {{ child.first_name|first|upper }}
+                        </div>
+                        <strong>{{ child.first_name }} {{ child.last_name }}</strong>
+                    </div>
+                </td>
+                <td>{{ child.date_of_birth|date:"M d, Y" }}</td>
+                <td>{{ child.age_display }}</td>
+                <td>{{ child.get_gender_display }}</td>
+                <td>{% if child.blood_group %}<span class="badge-status badge-completed">{{ child.blood_group }}</span>{% else %}-{% endif %}</td>
+                {% if role != 'parent' %}<td>{{ child.parent.get_full_name }}</td>{% endif %}
+                <td>
+                    <a href="{% url 'child_detail' child.pk %}" class="btn btn-sm btn-outline-primary me-1">View</a>
+                    <a href="{% url 'child_edit' child.pk %}" class="btn btn-sm btn-outline-secondary me-1">Edit</a>
+                    <a href="{% url 'child_delete' child.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fa fa-child-reaching" style="font-size:48px; color:#ccc; display:block; margin-bottom:16px;"></i>
+            <p style="color:var(--text-muted);">No children records found.</p>
+            <a href="{% url 'child_add' %}" class="btn btn-primary">Add First Child</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

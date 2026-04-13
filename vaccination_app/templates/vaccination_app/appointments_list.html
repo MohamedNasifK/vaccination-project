@@ -1,0 +1,73 @@
+{% extends 'vaccination_app/base.html' %}
+{% block title %}Appointments - VacciTrack{% endblock %}
+{% block page_title %}Appointments{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 style="font-size:20px; font-weight:800; margin-bottom:2px;">Appointments</h2>
+        <p style="color:var(--text-muted); font-size:13px;">{{ appointments.count }} record(s)</p>
+    </div>
+    {% if role == 'parent' %}
+    <a href="{% url 'appointment_add' %}" class="btn btn-primary"><i class="fa fa-plus me-2"></i>Book Appointment</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        {% if appointments %}
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>Child</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Vaccines</th>
+                    <th>Status</th>
+                    {% if role == 'admin' or role == 'doctor' %}<th>Actions</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for appt in appointments %}
+            <tr>
+                <td>
+                    <strong>{{ appt.child }}</strong>
+                    {% if role != 'parent' %}<br><small style="color:var(--text-muted);">{{ appt.parent.get_full_name }}</small>{% endif %}
+                </td>
+                <td>{{ appt.appointment_date|date:"M d, Y" }}</td>
+                <td>{{ appt.appointment_time|time:"g:i A" }}</td>
+                <td>
+                    {% for v in appt.vaccines.all %}
+                    <span class="badge-status badge-scheduled me-1">{{ v.short_name }}</span>
+                    {% empty %}-{% endfor %}
+                </td>
+                <td><span class="badge-status badge-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                {% if role == 'admin' or role == 'doctor' %}
+                <td>
+                    <form method="post" action="{% url 'appointment_update_status' appt.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <select name="status" class="form-select form-select-sm d-inline-block" style="width:130px;" onchange="this.form.submit()">
+                            <option value="pending" {% if appt.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="confirmed" {% if appt.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                            <option value="completed" {% if appt.status == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="cancelled" {% if appt.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </form>
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fa fa-calendar-xmark" style="font-size:48px; color:#ccc; display:block; margin-bottom:16px;"></i>
+            <p style="color:var(--text-muted);">No appointments found.</p>
+            {% if role == 'parent' %}
+            <a href="{% url 'appointment_add' %}" class="btn btn-primary">Book First Appointment</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
