@@ -49,13 +49,6 @@
                     {% if role == 'admin' or role == 'doctor' %}
                     <a href="{% url 'record_edit' r.pk %}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
                     {% endif %}
-                    {% if not r.reminder_sent and r.status == 'scheduled' %}
-                    <a href="{% url 'send_reminder' r.pk %}" class="btn btn-sm btn-outline-secondary">
-                        <i class="fa fa-bell me-1"></i>Remind
-                    </a>
-                    {% elif r.reminder_sent %}
-                    <span style="font-size:11px; color:var(--text-muted);"><i class="fa fa-check me-1"></i>Reminded</span>
-                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

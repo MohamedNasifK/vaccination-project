@@ -5,8 +5,6 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Count, Q
-from django.core.mail import send_mail
-from django.conf import settings
 
 from .models import UserProfile, Child, Vaccine, VaccinationRecord, Appointment
 from .forms import (
@@ -265,21 +263,13 @@ def users_list(request):
     return render(request, 'vaccination_app/users_list.html', {'users': users})
 
 
-@login_required
-def send_reminder(request, record_pk):
-    record = get_object_or_404(VaccinationRecord, pk=record_pk)
-    if not record.reminder_sent:
-        try:
-            send_mail(
-                subject=f'Vaccination Reminder: {record.vaccine.name}',
-                message=f'Dear Parent,\n\nThis is a reminder that {record.child.first_name} is scheduled for {record.vaccine.name} (Dose {record.dose_number}) on {record.scheduled_date}.\n\nPlease contact your healthcare provider to schedule an appointment.\n\nStay Healthy!',
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[record.child.parent.email],
-                fail_silently=True,
-            )
-            record.reminder_sent = True
-            record.save()
-            messages.success(request, 'Reminder sent successfully!')
-        except Exception:
-            messages.error(request, 'Failed to send reminder.')
-    return redirect('records_list')
+def create_user(request):
+    if not request.user.is_superuser and get_user_role(request.user) != 'admin':
+        messages.error(request, 'Admin access required.')
+        return redirect('dashboard')
+    form = RegisterForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'User created successfully!')
+        return redirect('users_list')
+    return render(request, 'vaccination_app/child_form.html', {'form': form, 'title': 'Create New User'})

@@ -284,28 +284,5 @@
                 {% endif %}
             </div>
         </div>
-        <div class="card">
-            <div class="card-header"><i class="fa fa-syringe me-2" style="color:var(--primary);"></i>Due Soon</div>
-            <div class="card-body p-0">
-                {% if upcoming_vaccinations %}
-                <table class="table mb-0">
-                    <thead><tr><th>Child</th><th>Vaccine</th><th>Due Date</th></tr></thead>
-                    <tbody>
-                    {% for r in upcoming_vaccinations %}
-                    <tr>
-                        <td>{{ r.child.first_name }}</td>
-                        <td>{{ r.vaccine.short_name }}</td>
-                        <td>{{ r.scheduled_date|date:"M d, Y" }}</td>
-                    </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <div class="text-center py-4" style="color:var(--text-muted); font-size:14px;">All vaccinations up to date! 🎉</div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
 {% endif %}
 {% endblock %}

@@ -24,7 +24,6 @@ urlpatterns = [
     path('records/', views.records_list, name='records_list'),
     path('records/add/', views.record_add, name='record_add'),
     path('records/<int:pk>/edit/', views.record_edit, name='record_edit'),
-    path('records/<int:pk>/reminder/', views.send_reminder, name='send_reminder'),
 
     # Vaccines
     path('vaccines/', views.vaccines_list, name='vaccines_list'),
@@ -32,4 +31,5 @@ urlpatterns = [
 
     # Users (Admin)
     path('users/', views.users_list, name='users_list'),
+    path('users/create/', views.create_user, name='create_user'),
 ]

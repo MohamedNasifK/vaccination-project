@@ -51,29 +51,25 @@ class RegisterForm(UserCreationForm):
 class ChildForm(forms.ModelForm):
     class Meta:
         model = Child
-        fields = ['first_name', 'last_name', 'date_of_birth', 'gender', 'blood_group', 'birth_weight', 'allergies', 'notes']
+        fields = ['first_name', 'last_name', 'date_of_birth', 'gender', 'blood_group']
         widgets = {
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'gender': forms.Select(attrs={'class': 'form-control'}),
             'blood_group': forms.Select(attrs={'class': 'form-control'}),
-            'birth_weight': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'allergies': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
 
 class AppointmentForm(forms.ModelForm):
     class Meta:
         model = Appointment
-        fields = ['child', 'appointment_date', 'appointment_time', 'vaccines', 'reason']
+        fields = ['child', 'appointment_date', 'appointment_time', 'vaccines']
         widgets = {
             'child': forms.Select(attrs={'class': 'form-control'}),
             'appointment_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'appointment_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'vaccines': forms.CheckboxSelectMultiple(),
-            'reason': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
     def __init__(self, user, *args, **kwargs):
@@ -84,17 +80,13 @@ class AppointmentForm(forms.ModelForm):
 class VaccinationRecordForm(forms.ModelForm):
     class Meta:
         model = VaccinationRecord
-        fields = ['child', 'vaccine', 'dose_number', 'scheduled_date', 'administered_date', 'status', 'batch_number', 'site', 'notes']
+        fields = ['child', 'vaccine', 'dose_number', 'scheduled_date', 'status']
         widgets = {
             'child': forms.Select(attrs={'class': 'form-control'}),
             'vaccine': forms.Select(attrs={'class': 'form-control'}),
             'dose_number': forms.NumberInput(attrs={'class': 'form-control'}),
             'scheduled_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'administered_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
-            'batch_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'site': forms.TextInput(attrs={'class': 'form-control'}),
-            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
 
